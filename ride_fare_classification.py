@@ -115,8 +115,7 @@ def impute(df):
 
 
 def preprocess(df, test=0):
-  df.label = df.label.map({"correct":1,"incorrect":0})
-
+  
   df.drop('label',axis=1,inplace=True)
 
   df['time_dur'] = (df.drop_time-df.pickup_time).astype('timedelta64[s]')
@@ -142,6 +141,7 @@ def __main__():
 
   #train
   trainDF = pd.read_csv('train.csv', parse_dates=['pickup_time','drop_time'])
+  trainDF.label = trainDF.label.map({"correct":1,"incorrect":0})
   
   norm_train = preprocess(trainDF)
 
@@ -158,146 +158,5 @@ def __main__():
 
 
 __main__()
-
-
-# ==========================================================
-
-plt.style.use('seaborn-whitegrid')
-
-f_cols = ['tripid','prediction']
-preds_rand = preds_rand[f_cols]
-preds_rand.head()
-
-
-preds_rand['prediction'] = preds_rand['prediction'].astype(int)
-preds_rand.to_csv('submission5.csv',index=False)
-
-preds_rand
-
-n, bins, patches = plt.hist(X['additional_fare'], bins='auto', facecolor='blue', alpha=0.5)
-plt.show()
-
-# X['pickup_time_edited'] = X['pickup_time'].dt.time
-X['pickup_time_edited'] = (X['pickup_time'].dt.hour*60+X['pickup_time'].dt.minute)*60 + X['pickup_time'].dt.second
-
-test['pickup_time_edited'] = (test['pickup_time'].dt.hour*60+test['pickup_time'].dt.minute)*60 + test['pickup_time'].dt.second
-
-X['pickup_time_edited']
-
-
-
-n, bins, patches = plt.hist(X['pickup_time_edited'], bins='auto', facecolor='blue', alpha=0.5)
-plt.show()
-
-X.set_index('pickup_time_edited').plot()
-
-
-
-sns.scatterplot(x=X['duration'], y=X['cal_duration'])
-
-sns.lmplot(x="pickup_time_edited", y="fare", hue="label", data=X)
-
-# Set the width and height of the figure
-plt.figure(figsize=(16,6))
-
-
-sns.lineplot(data=X['duration'])
-
-X.loc[X.additional_fare > 1000].index
-
-X = X.drop(X.loc[X.additional_fare > 1000].index)
-
-X.describe()
-
-X.loc[X.duration > 100000]
-
-X = X.drop(X.loc[X.duration > 100000].index)
-
-X.head()
-
-object_cols = [col for col in X.columns if X[col].dtype == "object"]
-object_cols
-
-pd.to_datetime(X['pickup_time'])
-
-
-X.head()
-
-missing_val_count_by_column = (imputed_X_train.isnull().sum())
-missing_val_count_by_column[missing_val_count_by_column>0]
-
-X
-
-X['cal_duration'] = (X.drop_time-X.pickup_time).astype('timedelta64[s]')
-test['cal_duration'] = (test.drop_time-test.pickup_time).astype('timedelta64[s]')
-
-cols = X.columns.tolist()
-cols = cols[-1:] + cols[:-1]
-cols
-
-X = X[cols]
-test = test[cols]
-
-test.head()
-
-test_new = test.drop(['pickup_time',
- 'drop_time',
- 'pick_lat',
- 'pick_lon',
- 'drop_lat',
- 'drop_lon','tripid'],axis='columns')
-
-test_new.head()
-
-
-imputed_X_train = X
-# Imputation
-my_imputer = SimpleImputer()
-imputed_X_train = pd.DataFrame(my_imputer.fit_transform(X.drop(['pickup_time','drop_time'],axis='columns')))
-imputed_X_train.columns = X.drop(['pickup_time','drop_time'],axis='columns').columns
-
-imputed_X_train.columns = X.drop(['pickup_time','drop_time'],axis='columns').columns
-
-imputed_X_train
-
-test
-
-
-
-
-
-test['distance'] = distance(test['pick_lat'], test['drop_lat'], test['pick_lon'], test['drop_lon'])
-
-cols = imputed_X_train.columns.tolist()
-cols = cols[-1:] + cols[:-1]
-imputed_X_train = imputed_X_train[cols]
-
-cols = test.columns.tolist()
-cols = cols[-1:] + cols[:-1]
-cols
-test = test[cols]
-
-test
-
-x_data = imputed_X_train.drop(['tripid','label',
- 'pick_lat',
- 'pick_lon',
- 'drop_lat',
- 'drop_lon'],axis='columns')
-y = imputed_X_train.label
-
-
-final = pd.DataFrame(preds)
-
-
-
-preds_rand.columns = ['prediction','tripid']
-
-
-
-
-
-preds_rand
-
 
 
